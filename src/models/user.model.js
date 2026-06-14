@@ -26,11 +26,11 @@ const userschema = new mongoose.Schema({
         })
 userschema.pre("save" , async function (next) {
     if(!this.isModified('password')){
-        return next()
+        return
     }
     const hashedpass = await bcrypt.hash(this.password,10)
     this.password = hashedpass
-        return next()
+        return 
 })
 
 userschema.methods.comparepassword = async function (password){
