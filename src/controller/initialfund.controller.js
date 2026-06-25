@@ -22,7 +22,6 @@ async function createInitialFundsTransaction(req,res) {
     }
 
     const fromuseraccount = await accountmodel.findOne({
-        systemuser:true,
         user: req.user._id
     })
     if(!fromuseraccount){
@@ -33,26 +32,26 @@ async function createInitialFundsTransaction(req,res) {
 const session = mongoose.startSession()
 session.startTransaction()
 
-const transaction = await transactionmodel.create({
+const transaction = new transactionmodel({
     fromaccount:fromuseraccount._id,
         toaccount,
         amount,
         idempotencyKey,
         status:"PENDING"
-    },{session})
-const debitledgerEntry = await ledgermodel.create({
+    })
+const debitledgerEntry = await ledgermodel.create([{
     account:fromuseraccount._id,
     amount:amount,
     transaction:transaction._id,
     type:'DEBIT'
-},{session})
+}],{session})
 
-const creditledgerEntry = await ledgermodel.create({
+const creditledgerEntry = await ledgermodel.create([{
     account:touseraccount._id,
     amount:amount,
     transaction:transaction._id,
     type:'CREDIT'
-},{session})
+}],{session})
 
 
 transaction.status = "SUCCESSFULL"
